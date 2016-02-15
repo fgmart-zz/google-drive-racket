@@ -5,7 +5,7 @@ I started this project in response to [this thread](https://productforums.google
 
 As I figured out what's needed to do this, it's obvious why:
 
-1. You have to recursively decend through subfolders, collecting all files that have the root folder as a parent (and filtering them for files that are folders)
+1. You have to recursively descend through subfolders, collecting all files that have the current folder as a parent (and filtering them for files that are folders)
 2. Then you can construct a search query that includes a list of all the subfolders (flattened into a single list)
 3. Only this isn't the full solution, because if you have too many subfolders, it doesn't fit into the URL of one search query.
 
