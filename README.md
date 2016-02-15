@@ -1,7 +1,7 @@
 # google-drive-racket
 Recursively make list of subfolders in a Google Drive folder, and then search them. Using Scheme (racket-lang.org).
 
-I started this project in response to (https://productforums.google.com/forum/#!msg/drive/9YJNsdr0mMY/9OL4CoLhCwAJ "this thread") on the Google Drive help forum, where we all were annoyed that you can't limit a search to a folder (and including all subfolders that it contained).
+I started this project in response to [this thread](https://productforums.google.com/forum/#!msg/drive/9YJNsdr0mMY/9OL4CoLhCwAJ) on the Google Drive help forum, where we all were annoyed that you can't limit a search to a folder (and including all subfolders that it contained).
 
 As I figured out what's needed to do this, it's obvious why:
 
