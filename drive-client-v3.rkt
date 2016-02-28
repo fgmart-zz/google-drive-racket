@@ -4,7 +4,6 @@
 (require (planet ryanc/webapi:1:=1/oauth2))
 (require json)
 (require net/uri-codec)
-(require racket/serialize)
 
 ; interface to Google Drive including collecting folders with sub-folders,
 ; and searching over a list of folders.
@@ -24,31 +23,38 @@
 ; 
 ; search-complete-folder takes a list of folder ID strings and a search phrase (may be empty string)
 ;  and returns list of drive#file objects matching search
+; 
+; (display-titles <list of drive#file objs>) will print each file's title and URL to it.
 ;
 ; examples
 ; assume foo is a list of folder ID strings to search
-;   (define foo (map get-id (list-all-folders "<folder-id-string>")))
-;   (search-complete-folder foo "") => all files in those folders
-;   (search-complete-folder foo "'fredm@cs.uml.edu' in owners")
-;   (search-complete-folder foo "fullText contains fredm")
-;   (search-complete-folder foo "modifiedTime > '2015-10-01'")
+;   (define myfolders (map get-id (list-all-folders "<folder-id-string>")))
+;   (search-complete-folder myfolders "") => all files in those folders
+;   (search-complete-folder myfolders "'fredm@cs.uml.edu' in owners")
+;   (search-complete-folder myfolders "fullText contains fredm")
+;   (search-complete-folder myfolders "modifiedTime > '2015-10-01'")
 ; etc.
 ; see https://developers.google.com/drive/v3/web/search-parameters
 ;
-; current state of affairs
-; existing bug:
-; if the list of folder ID strings is too long, search-complete-folder will fail
-; because the constructed URL gets too long.
+;   (define mysearch (search-complete-folders myfolders "modifiedTime > '2015-10-01'"))
+;   (display-titles mysearch)
+;
+; existing bugs:
+; * if the list of folder ID strings is too long, search-complete-folder will fail
+;   because the constructed URL gets too long.
+;
+; * if the search comes up empty (usually because of a malformed search query),
+;   there will be a runtime error.
 ;
 ; to improve:
 ; there are five sorts of arg/return types:
 ; - obj ID string
-; - list of obj ID strings
+; - list of obj ID strings (e.g. list of folder ID strings)
 ; - drive#file obj (with slots for id, kind, mimeType, and name)
 ; - list of drive#file objs
 ; - drive#fileList obj, as returned by direct API calls (e.g. all-drive-files and inside various procs),
 ;   (with slots for kind, files, and nextPageToken)
-; it's hard keeping straight what is what where.
+; it's hard keeping straight which procedure accepts which thing.
 
 ; to go Google Developers Console and make a project
 ; go to Dashboard > Explore other services > Enable APIs and get credentials like keys
@@ -66,7 +72,8 @@
 ; set renew to true
 ; evaluate buffer and you should get a redirect to your system web browser
 ; approve permissions in web browser
-; sometimes it fails to communicate back with the temporary localhost web server should be running
+; sometimes it fails to communicate back with the temporary localhost web server
+; that gets launched
 ; keep trying until it succeeds, then evaluate:
 ;   (send myoauth2 headers)
 ; and copy the new bearer token into the else position of the (if renew...) statement.
@@ -92,7 +99,7 @@
                         '("https://www.googleapis.com/auth/drive")
                         ))
       (set! token (send myoauth2 headers)))
-    (set! token '("Authorization: Bearer ya29.iQL8v-EaTz24qird1exOirWM0ncG1DudIeq-sIFA6rmeUj1WK2-OIgs1i4py9D7YRRjP")))
+    (set! token '("Authorization: Bearer ya29.lgJMRfkaypKseG9HMIeZzp4AuuKDy5YLfUolEdHSwAwmoqSepSuUVe3hSyyG1rw27g")))
 
 ; have to do (send myoauth2 validate!) before (send myoauth2 get-scopes) will work.
 
@@ -208,23 +215,25 @@
    (get-pure-port
     (string->url (string-append "https://www.googleapis.com/drive/v3/files?key="
                                 (send drive-client get-id)
-;                                "&pageSize=5"
+                                "&pageSize=10"
                                 ))
     token)))
 
 ;(define my-items (hash-ref drive-files 'items))
 
-; accepts a list of file objects 
+; accepts a list of file objects and URLs to open
 (define (display-titles file-list)
   (cond ((not (null? file-list))
          (begin
            (let ((item (car file-list)))
-             (display "kind: ")
-             (display (hash-ref item 'kind))
-             (display " mimeType: ")
-             (display (hash-ref item 'mimeType))
-             (display " title: ")
-             (display (hash-ref item 'title))
+;             (display "kind: ")
+;             (display (hash-ref item 'kind))
+;             (display " mimeType: ")
+;             (display (hash-ref item 'mimeType))
+;             (display " title: ")
+             (display (hash-ref item 'name))
+             (display (string-append "\thttps://drive.google.com/open?id="
+                                     (get-id item)))
              (display "\n")
              (display-titles (cdr file-list)))))))
 ; e.g.
