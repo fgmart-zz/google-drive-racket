@@ -9,7 +9,7 @@
 ; and searching over a list of folders.
 ; uses Drive API v3
 ;
-; Fred Martin, fredm@cs.uml.edu, Feb 15 2016
+; Fred Martin, fredm@cs.uml.edu, Feb 28 2016
 ;
 ; to use:
 ; first set up the authentication token (see below),
