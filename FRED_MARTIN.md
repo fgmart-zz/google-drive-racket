@@ -70,11 +70,61 @@ this list appears as hash map.
 ```get-files``` retrieves a list of the files themselves, and ```get-id``` retrieves the unique ID
 associated with a ```drive#fileList``` object:
 
+```
 (define (get-files obj)
   (hash-ref obj 'files))
 
 (define (get-id obj)
   (hash-ref obj 'id))
+```
+
+# Using Recursion to Accumulate Results
+
+The low-level routine for interacting with Google Drive is named ```list-children```. This accepts an ID of a 
+folder object, and optionally, a token for which page of results to produce.
+
+A lot of the work here has to do with pagination. Because it's a web interface, one can only obtain a page of
+results at a time. So it's necessary to step through each page. When a page is returned, it includes a token
+for getting the next page. The ```list-children``` just gets one page:
+
+```
+(define (list-children folder-id . next-page-token)
+  (read-json
+   (get-pure-port
+    (string->url (string-append "https://www.googleapis.com/drive/v3/files?"
+                                "q='" folder-id "'+in+parents"
+                                "&key=" (send drive-client get-id)
+                                (if (= 1 (length next-page-token))
+                                    (string-append "&pageToken=" (car next-page-token))
+                                    "")
+;                                "&pageSize=5"
+                                ))
+    token)))
+```
+The interesting routine is ```list-all-children```. This routine is directly invoked by the user.
+It optionally accepts a page token; when it's used at top level this parameter will be null.
+
+The routine uses ```let*``` to retrieve one page of results (using the above ```list-children``` procedure)
+and also possibly obtain a token for the next page.
+
+If there is a need to get more pages, the routine uses ```append``` to pre-pend the current results with 
+a recursive call to get the next page (and possibly more pages).
+
+Ultimately, when there are no more pages to be had, the routine terminates and returns the current page. 
+
+This then generates a recursive process from the recursive definition.
+
+```
+(define (list-all-children folder-id . next-page-token)
+  (let* ((this-page (if (= 0 (length next-page-token))
+                      (list-children folder-id)
+                      (list-children folder-id (car next-page-token))))
+         (page-token (hash-ref this-page 'nextPageToken #f)))
+    (if page-token
+        (append (get-files this-page)
+              (list-all-children folder-id page-token))
+        (get-files this-page))))
+```
 
 ## Filtering a List of File Objects for Only Those of Folder Type
 
