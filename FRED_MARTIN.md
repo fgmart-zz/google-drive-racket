@@ -37,7 +37,9 @@ The code uses four libraries:
 Here is a discussion of the most essential procedures, including a description of how they embody ideas from 
 UMass Lowell's COMP.3010 Organization of Programming languages course.
 
-## Initialization using a Global Object
+Five examples are shown and they are individually numbered. 
+
+## 1. Initialization using a Global Object
 
 The following code creates a global object, ```drive-client``` that is used in each of the subsequent API calls:
 
@@ -51,7 +53,7 @@ The following code creates a global object, ```drive-client``` that is used in e
  While using global objects is not a central theme in the course, it's necessary to show this code to understand
  the later examples.
  
-## Selectors and Predicates using Procedural Abstraction
+## 2. Selectors and Predicates using Procedural Abstraction
 
 A set of procedures was created to operate on the core ```drive-file``` object. Drive-files may be either
 actual file objects or folder objects. In Racket, they are represented as a hash table.
@@ -77,8 +79,7 @@ associated with a ```drive#fileList``` object:
 (define (get-id obj)
   (hash-ref obj 'id))
 ```
-
-# Using Recursion to Accumulate Results
+## 3. Using Recursion to Accumulate Results
 
 The low-level routine for interacting with Google Drive is named ```list-children```. This accepts an ID of a 
 folder object, and optionally, a token for which page of results to produce.
@@ -126,7 +127,7 @@ This then generates a recursive process from the recursive definition.
         (get-files this-page))))
 ```
 
-## Filtering a List of File Objects for Only Those of Folder Type
+## 4. Filtering a List of File Objects for Only Those of Folder Type
 
 The ```list-all-children``` procedure creates a list of all objects contained within a given folder.
 These objects include the files themselves and other folders.
@@ -139,7 +140,7 @@ contained in a given folder:
   (filter folder? (list-all-children folder-id)))
 ```
 
-## Recursive Descent on a Folder Hierarchy
+## 5. Recursive Descent on a Folder Hierarchy
 
 These procedures are used together in ```list-all-folders```, which accepts a folder ID and recursively
 obtains the folders at the current level and then recursively calls itself to descend completely into the folder
