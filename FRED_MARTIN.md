@@ -128,5 +128,30 @@ This then generates a recursive process from the recursive definition.
 
 ## Filtering a List of File Objects for Only Those of Folder Type
 
+The ```list-all-children``` procedure creates a list of all objects contained within a given folder.
+These objects include the files themselves and other folders.
+
+The ```filter``` abstraction is then used with the ```folder?``` predicate to make a list of subfolders
+contained in a given folder:
+
+```
 (define (list-folders folder-id)
   (filter folder? (list-all-children folder-id)))
+```
+
+## Recursive Descent on a Folder Hierarchy
+
+These procedures are used together in ```list-all-folders```, which accepts a folder ID and recursively
+obtains the folders at the current level and then recursively calls itself to descend completely into the folder
+hierarchy.
+
+```map``` and ```flatten``` are used to accomplish the recursive descent:
+
+```
+(define (list-all-folders folder-id)
+  (let ((this-level (list-folders folder-id)))
+    (begin
+      (display (length this-level)) (display "... ")
+      (append this-level
+              (flatten (map list-all-folders (map get-id this-level)))))))
+```
