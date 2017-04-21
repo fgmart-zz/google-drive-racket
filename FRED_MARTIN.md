@@ -50,4 +50,33 @@ The following code creates a global object, ```drive-client``` that is used in e
  
  While using global objects is not a central theme in the course, it's necessary to show this code to understand
  the later examples.
+ 
+## Selectors and Predicates using Procedural Abstraction
 
+A set of procedures was created to operate on the core ```drive-file``` object. Drive-files may be either
+actual file objects or folder objects. In Racket, they are represented as a hash table.
+
+```folder?``` accepts a ```drive-file```, inspects its ```mimeType```, and returns ```#t``` or ```#f```:
+
+```
+(define (folder? drive-file)
+  (string=? (hash-ref drive-file 'mimeType "nope") "application/vnd.google-apps.folder"))
+```
+
+Another object produced by the Google Drive API is a list of drive-file objects ("```drive#fileList```"). 
+When converted by the JSON library,
+this list appears as hash map. 
+
+```get-files``` retrieves a list of the files themselves, and ```get-id``` retrieves the unique ID
+associated with a ```drive#fileList``` object:
+
+(define (get-files obj)
+  (hash-ref obj 'files))
+
+(define (get-id obj)
+  (hash-ref obj 'id))
+
+## Filtering a List of File Objects for Only Those of Folder Type
+
+(define (list-folders folder-id)
+  (filter folder? (list-all-children folder-id)))
