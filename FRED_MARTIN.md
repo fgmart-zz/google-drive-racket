@@ -79,7 +79,7 @@ associated with a ```drive#fileList``` object:
 (define (get-id obj)
   (hash-ref obj 'id))
 ```
-## 3. Using Recursion to Accumulate Results
+## 3. Using Recursion to Assemble Results
 
 The low-level routine for interacting with Google Drive is named ```list-children```. This accepts an ID of a 
 folder object, and optionally, a token for which page of results to produce.
